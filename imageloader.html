@@ -29,30 +29,28 @@
 			});
 
             $('#brightnessbar').change( function() {
-                var val = parseInt($('#brightnessbar').val());
-                $('#brightnessval').html(val);
-                console.log( val );
+                var beta = parseInt($('#brightnessbar').val());
+                $('#brightnessval').html(beta);
                 var I = loader.result;
 
                 if( $('#brightnesscontrast').is(':checked') ){
-                    var val2 = parseInt($('#contrastbar').val());
-                    I = filters.brightnesscontrast(I, val, val2);
+                    var alpha = parseInt($('#contrastbar').val());
+                    I = filters.brightnesscontrast(I, alpha, beta);
                 }else {
-                    I = filters.brightness(I, val);
+                    I = filters.brightness(I, beta);
                 }
                 I.render(canvas);
             });
 
             $('#contrastbar').change( function() {
-                var val = parseInt($('#contrastbar').val());
-                $('#contrastval').html(val);
-                console.log( val );
+                var alpha = parseInt($('#contrastbar').val());
+                $('#contrastval').html(alpha);
                 var I = loader.result;
                 if( $('#brightnesscontrast').is(':checked') ){
-                    var val2 = parseInt($('#brightnessbar').val());
-                    I = filters.brightnesscontrast(I, val2, val);
+                    var beta = parseInt($('#brightnessbar').val());
+                    I = filters.brightnesscontrast(I, alpha, beta);
                 }else{
-                    I = filters.contrast(I, val);
+                    I = filters.contrast(I, alpha);
                 }
                 I.render(canvas);
             });
