@@ -51,13 +51,25 @@ RGBAImage.prototype.setPixel = function(x, y, c) {
 
 // utility function
 // per-pixel operation
+RGBAImage.prototype.apply = function( f ) {
+    for(var y=0;y<this.h;y++) {
+        for(var x=0;x<this.w;x++) {
+            this.setPixel(x, y, f(this.getPixel(x, y)));
+        }
+    }
+    return this;
+};
+
+// utility function
+// per-pixel operation
 RGBAImage.prototype.map = function( f ) {
+    var dst = new RGBAImage(this.w, this.h);
 	for(var y=0;y<this.h;y++) {
 		for(var x=0;x<this.w;x++) {
-			this.setPixel(x, y, f(this.getPixel(x, y)));
+			dst.setPixel(x, y, f(this.getPixel(x, y)));
 		}
 	}
-	return this;
+	return dst;
 };
 
 // for web-gl

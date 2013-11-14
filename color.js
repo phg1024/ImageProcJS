@@ -34,15 +34,24 @@ Color.prototype.setColor = function(that)
 
 Color.prototype.equal = function( that ) {
     return (this.r == that.r && this.g == that.g && this.b == that.b);
-}
+};
 
 Color.prototype.add = function(that) {
     return new Color(this.r + that.r, this.g + that.g, this.b + that.b, this.a + that.a);
 };
 
+Color.prototype.sub = function(that) {
+    return new Color(this.r - that.r, this.g - that.g, this.b - that.b, this.a - that.a);
+};
+
 Color.prototype.mul = function(c)
 {
     return new Color(this.r * c, this.g * c, this.b * c, this.a * c);
+};
+
+// only r, g, b channels are modified
+Color.prototype.mulc = function(c) {
+    return new Color(this.r * c, this.g * c, this.b * c, this.a);
 };
 
 Color.prototype.clamp = function() {
@@ -51,7 +60,7 @@ Color.prototype.clamp = function() {
     this.b = clamp(this.b, 0, 255);
     this.a = clamp(this.a, 0, 255);
     return this;
-}
+};
 
 Color.interpolate = function(c1, c2, t)
 {

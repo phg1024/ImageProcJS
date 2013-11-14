@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>ImageProcJS</title>
+    <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="mathutils.js"></script>
 	<script type="text/javascript" src="color.js"></script>
 	<script type="text/javascript" src="image.js"></script>
 	<script type="text/javascript" src="filter.js"></script>
@@ -16,28 +18,69 @@
 			canvas = document.getElementById('cvs');
 			context = canvas.getContext('2d');
 			
-			document.getElementById('show_btn').onclick = function() {
+			$('#show_btn').click( function() {
                 loader.loadImage('seal.jpg', canvas);
-			};
+			});
 			
-			document.getElementById('gs_btn').onclick = function() {
+			$('#gs_btn').click( function() {
                 var I = loader.result;
 				I = filters.grayscale(I);
 				I.render(canvas);
-			}
+			});
+
+            $('#brightnessbar').change( function() {
+                var val = parseInt($('#brightnessbar').val());
+                $('#brightnessval').html(val);
+                console.log( val );
+                var I = loader.result;
+
+                if( $('#brightnesscontrast').is(':checked') ){
+                    var val2 = parseInt($('#contrastbar').val());
+                    I = filters.brightnesscontrast(I, val, val2);
+                }else {
+                    I = filters.brightness(I, val);
+                }
+                I.render(canvas);
+            });
+
+            $('#contrastbar').change( function() {
+                var val = parseInt($('#contrastbar').val());
+                $('#contrastval').html(val);
+                console.log( val );
+                var I = loader.result;
+                if( $('#brightnesscontrast').is(':checked') ){
+                    var val2 = parseInt($('#brightnessbar').val());
+                    I = filters.brightnesscontrast(I, val2, val);
+                }else{
+                    I = filters.contrast(I, val);
+                }
+                I.render(canvas);
+            });
 			
-			document.getElementById('files').addEventListener('change', 
-			function( e ){
+			$('#files').change( function( e ){
 				handleFileSelect(e, loader, canvas);
-			}, 
-			false);
-		}		
-		
+			});
+		}
 	</script>
 </head>
 <body>
 <button id="show_btn">Show Remote Image</button>
-<button id="gs_btn">Show Grayscale</button>
+<div>
+<table>
+    <tr>
+        <td><button id="gs_btn">Show Grayscale</button></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" id="brightnesscontrast">Brightness & Contrast</td>
+    </tr>
+    <tr>
+        <td><input type="range" id="brightnessbar" min="-128" max="128" value="0">Brightness</td><td><p id="brightnessval"></p></td>
+    </tr>
+    <tr>
+        <td><input type="range" id="contrastbar" min="-128" max="128" value="0">Contrast</td><td><p id="contrastval"></p></td>
+    </tr>
+</table>
+</div>
 Upload image:
 <input type="file" id="files" name="files[]" />
 <output id="list"></output>
