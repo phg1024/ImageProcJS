@@ -62,6 +62,14 @@ Color.prototype.clamp = function() {
     return this;
 };
 
+Color.prototype.round = function() {
+    this.r = Math.round(this.r);
+    this.g = Math.round(this.g);
+    this.b = Math.round(this.b);
+    this.a = Math.round(this.a);
+    return this;
+};
+
 Color.interpolate = function(c1, c2, t)
 {
     return c1.mul(t).add(c2.mul(1-t));

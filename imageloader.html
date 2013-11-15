@@ -28,6 +28,18 @@
 				I.render(canvas);
 			});
 
+            $('#hist_btn').click(function() {
+                var I = loader.result;
+                I = filters.histogram(I);
+                I.render(canvas);
+            });
+
+            $('#ahe_btn').click(function() {
+                var I = loader.result;
+                I = filters.ahe(I);
+                I.render(canvas);
+            });
+
             $('#brightnessbar').change( function() {
                 var beta = parseInt($('#brightnessbar').val());
                 $('#brightnessval').html(beta);
@@ -67,6 +79,12 @@
 <table>
     <tr>
         <td><button id="gs_btn">Show Grayscale</button></td>
+    </tr>
+    <tr>
+        <td><button id="hist_btn">Histogram Equalization</button></td>
+    </tr>
+    <tr>
+        <td><button id="ahe_btn">Adaptive Histogram Equalization</button></td>
     </tr>
     <tr>
         <td><input type="checkbox" id="brightnesscontrast">Brightness & Contrast</td>
