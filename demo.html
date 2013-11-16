@@ -3,20 +3,29 @@
 <head>
     <meta charset="utf-8">
     <title>ImageProcJS</title>
+	<!-- External libraries -->
     <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="d3.v3.min.js"></script>
+	
+	<!-- Peihong's library -->
     <script type="text/javascript" src="mathutils.js"></script>
 	<script type="text/javascript" src="color.js"></script>
 	<script type="text/javascript" src="image.js"></script>
 	<script type="text/javascript" src="filter.js"></script>
+	<script type="text/javascript" src="curve.js"></script>
+	<script type="text/javascript" src="tools/curvetool.js"></script>
 	<script type="text/javascript" src="imageloader.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script>
 		var context, canvas;
+        var curvetool;
 		var loader;
 		window.onload = function() {
             loader = new ImageLoader();
 			canvas = document.getElementById('cvs');
 			context = canvas.getContext('2d');
+            curvetool = new CurveTool();
+            curvetool.initCurveTool('#div_curvetool');
 			
 			$('#show_btn').click( function() {
                 loader.loadImage('seal.jpg', canvas);
@@ -102,6 +111,8 @@ Upload image:
 <output id="list"></output>
 
 <p id='imageinfo'></p>
-<canvas id="cvs"></canvas>
+<div>
+<canvas id="cvs"></canvas><div id='div_curvetool'></div>
+</div>
 </body>
 </html>
