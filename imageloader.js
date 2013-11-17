@@ -10,6 +10,7 @@ var ImageLoader = function(mw){
             var inImg = RGBAImage.fromImage(img, cvs);
             that.result = inImg.resize_longedge(that.maxEdge);
             that.result.render(cvs);
+            $(document).trigger('imageloaded');
         };
         img.src = imgsrc;
     };

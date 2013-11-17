@@ -93,16 +93,17 @@ RGBAImage.prototype.resize = function(w, h) {
 
 RGBAImage.prototype.resize_longedge = function( L ) {
     var nw, nh;
-    if( this.w > this.h ) {
+    if( this.w > this.h && this.w > L ) {
         nw = L;
         nh = Math.round((L / this.w) * this.h);
         return this.resize(nw, nh);
     }
-    else {
+    else if( this.h > L ){
         nh = L;
         nw = Math.round((L / this.h) * this.w);
         return this.resize(nw, nh);
     }
+    else return this;
 };
 
 // for web-gl
