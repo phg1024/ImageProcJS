@@ -8,6 +8,16 @@ svg{
     fill: steelblue;
 }
 
+#hist0 {
+    fill: rgba(255, 0, 0, 0.25);
+}
+#hist1 {
+    fill: rgba(0, 255, 0, 0.25);
+}
+#hist2 { 
+    fill: rgba(0, 0, 255, 0.25);
+}
+
 rect {
     fill: none;
     pointer-events: all;

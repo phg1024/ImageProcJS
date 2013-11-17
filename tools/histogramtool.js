@@ -10,7 +10,6 @@ var HistogramTool = function() {
     var hist = [];
 
     var svg, area;
-    var areaR, areaG, areaB;
 
     this.bindImage = function( I ) {
         switch( mode ) {
@@ -33,39 +32,85 @@ var HistogramTool = function() {
 
     this.bindHistogram = function( h ) {
         console.log('bind histogram');
-        hist = [];
-        var sum = 0;
-        var maxHist = 0;
-        for(var i=0;i< h.length;i++) {
-            hist[i] = {lev: i, cnt: h[i]};
-            sum += h[i];
-            maxHist = Math.max(maxHist, h[i]);
+        switch( mode ) {
+            case 'brightness': {
+                hist = [];
+                var sum = 0;
+                var maxHist = 0;
+                for(var i=0;i< h.length;i++) {
+                    hist[i] = {lev: i, cnt: h[i]};
+                    sum += h[i];
+                    maxHist = Math.max(maxHist, h[i]);
+                }
+        
+                // normalize
+                var factor = 0.9 / maxHist;
+                for(var i=0;i< h.length;i++) {
+                    hist[i].cnt *= factor;
+                }
+        
+                console.log(hist);                
+                break;
+            }
+            case 'rgb': {
+                
+                for(var c=0;c<3;c++) {
+                                
+                    hist[c] = [];
+                    var sum = 0;
+                    var maxHist = 0;
+                    for(var i=0;i< h[c].length;i++) {
+                        hist[c][i] = {lev: i, cnt: h[c][i]};
+                        sum += h[c][i];
+                        maxHist = Math.max(maxHist, h[c][i]);
+                    }
+            
+                    // normalize
+                    var factor = 0.9 / maxHist;
+                    for(var i=0;i< h[c].length;i++) {
+                        hist[c][i].cnt *= factor;
+                    }
+            
+                    console.log(hist[c]);   
+                }
+                
+                break;
+            }
+            default: {
+                throw 'invalid histogram mode!';
+            }
         }
-
-        // normalize
-        var factor = 0.9 / maxHist;
-        for(var i=0;i< h.length;i++) {
-            hist[i].cnt *= factor;
-        }
-
-        console.log(hist);
 
         redraw();
     };
 
     function redraw() {
         // display the histogram
-        svg.selectAll("path").datum(hist)
-            .attr("class", "area")
-            .attr("d", area);
+        
+        switch(mode) {
+            case 'rgb': {
+                for(var i=0;i<3;i++) {
+                    svg.select("#hist" + i).datum(hist[i])
+                        .attr("class", "area")
+                        .attr("d", area[i]);                    
+                }
+                break;
+            }
+            case 'brightness': {
+                svg.selectAll("path").datum(hist)
+                    .attr("class", "area")
+                    .attr("d", area);                
+                break;
+            }
+        }
     }
 
-    this.init = function( target, mode ) {
+    this.init = function( target, m ) {
         if( !target ) {
             throw "failed to initialize histogram tool";
         }
 
-        this.mode = mode || this.mode;
+        mode = m || mode;
 
         var x = d3.scale.linear()
             .range([0, width]);
@@ -100,7 +145,7 @@ var HistogramTool = function() {
         x.domain([0, 255]);
         y.domain([0.0, 1.0]);
 
-        switch( this.mode ) {
+        switch( mode ) {
             case 'brightness':
             {
                 area = d3.svg.area()
@@ -114,7 +159,22 @@ var HistogramTool = function() {
                 break;
             }
             case 'rgb': {
-
+                hist = new Array(3);
+                area = new Array(3);
+                var cls = ['red', 'green', 'blue'];
+                for(var i=0;i<3;i++) {
+                    hist[i] = [];
+                    area[i] = d3.svg.area()
+                        .x(function(d) { return x(d.lev); })
+                        .y0(height)
+                        .y1(function(d) { return y(d.cnt); });
+                    svg.append("path")
+                        .attr("id", 'hist' + i)
+                        .datum(hist[i])
+                        .attr("class", "area")
+                        .attr("d", area[i]);
+                    $('#hist' + i).addClass( cls[i] );
+                }
                 break;
             }
             default: {
