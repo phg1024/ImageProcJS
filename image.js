@@ -16,7 +16,7 @@ RGBAImage.prototype.getPixel = function(x, y) {
         this.data[idx+2],
         this.data[idx+3]
     );
-}
+};
 
 // bilinear sample of the image
 RGBAImage.prototype.sample = function(x, y) {
@@ -70,6 +70,39 @@ RGBAImage.prototype.map = function( f ) {
 		}
 	}
 	return dst;
+};
+
+// utility function
+// resize image
+RGBAImage.prototype.resize = function(w, h) {
+    var iw = this.w, ih = this.h;
+    // bilinear interpolation
+    var dst = new RGBAImage(w, h);
+
+    var ystep = 1.0 / (h-1);
+    var xstep = 1.0 / (w-1);
+    for(var i=0;i<h;i++) {
+        var y = i * ystep;
+        for(var j=0;j<w;j++) {
+            var x = j * xstep;
+            dst.setPixel(j, i, this.sample(x * (iw-1), y * (ih-1)));
+        }
+    }
+    return dst;
+};
+
+RGBAImage.prototype.resize_longedge = function( L ) {
+    var nw, nh;
+    if( this.w > this.h ) {
+        nw = L;
+        nh = Math.round((L / this.w) * this.h);
+        return this.resize(nw, nh);
+    }
+    else {
+        nh = L;
+        nw = Math.round((L / this.h) * this.w);
+        return this.resize(nw, nh);
+    }
 };
 
 // for web-gl

@@ -202,7 +202,7 @@ var filters = {
 					var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
 					var bias = 1e-6;			// prevent divide by zero
 					var ratio = lut[lev]/(lev + bias);
-					var c = c.mulc(ratio);
+					var c = c0.mulc(ratio);
 					return c.round().clamp();
 				});
 			}
