@@ -16,37 +16,40 @@
 	<script type="text/javascript" src="filter.js"></script>
 	<script type="text/javascript" src="curve.js"></script>
 	<script type="text/javascript" src="tools/curvetool.js"></script>
+    <script type="text/javascript" src="tools/histogramtool.js"></script>
 	<script type="text/javascript" src="imageloader.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script>
 		var context, canvas;
-        var curvetool;
+        var curvetool, histtool;
 		var loader;
 		window.onload = function() {
             loader = new ImageLoader();
 			canvas = document.getElementById('cvs');
 			context = canvas.getContext('2d');
             curvetool = new CurveTool();
-            curvetool.initCurveTool('#div_curvetool');
+            histtool = new HistogramTool();
+            histtool.init('#div_curvetool', 'rgb');
+            curvetool.init('#div_curvetool');
 
             $(document).on("curvechanged", function(evt) {
                console.log('curve changed.');
                 var I = loader.result;
                 I = filters.curve(I, curvetool.getLUT(), $('#channelselect').val());
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 
             $(document).on('imageloaded', function() {
                 var I = loader.result;
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 
             $('#resetcurve_btn').click(function() {
                 curvetool.resetCurveTool();
                 var I = loader.result;
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 			
 			$('#show_btn').click( function() {
@@ -57,21 +60,21 @@
                 var I = loader.result;
 				I = filters.grayscale(I);
 				I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
 			});
 
             $('#hist_btn').click(function() {
                 var I = loader.result;
                 I = filters.histogram(I);
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 
             $('#ahe_btn').click(function() {
                 var I = loader.result;
                 I = filters.ahe(I);
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 
             $('#brightnessbar').change( function() {
@@ -86,7 +89,7 @@
                     I = filters.brightness(I, beta);
                 }
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 
             $('#contrastbar').change( function() {
@@ -100,7 +103,7 @@
                     I = filters.contrast(I, alpha);
                 }
                 I.render(canvas);
-                curvetool.bindHistogram(histogram(I, 0, 0, I.w, I.h));
+                histtool.bindImage( I );
             });
 			
 			$('#files').change( function( e ){

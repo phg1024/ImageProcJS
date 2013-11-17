@@ -14,10 +14,6 @@ var CurveTool = function() {
     var line = d3.svg.line();
     var svg;
 
-    var hist = [];
-    var hsvg, area;
-
-
     this.resetCurveTool = function() {
         while( points.length > 2)
             points.splice(1, 1);
@@ -48,28 +44,6 @@ var CurveTool = function() {
         return lut;
     };
 
-    this.bindHistogram = function( h ) {
-        console.log('bind histogram');
-        hist = [];
-        var sum = 0;
-        var maxHist = 0;
-        for(var i=0;i< h.length;i++) {
-            hist[i] = {lev: i, cnt: h[i]};
-            sum += h[i];
-            maxHist = Math.max(maxHist, h[i]);
-        }
-
-        // normalize
-        var factor = 0.9 / maxHist;
-        for(var i=0;i< h.length;i++) {
-            hist[i].cnt *= factor;
-        }
-
-        console.log(hist);
-
-        redraw();
-    };
-
     function redraw() {
         //console.log('redrawing...');
 
@@ -94,63 +68,17 @@ var CurveTool = function() {
 
         circle.exit().remove();
 
-        // display the histogram
-        hsvg.selectAll("path").datum(hist)
-            .attr("class", "area")
-            .attr("d", area);
-
         if (d3.event) {
             d3.event.preventDefault();
             d3.event.stopPropagation();
         }
     }
 
-    this.initCurveTool = function( target )
+    this.init = function( target )
     {
-        if( !target ) return;
-
-        // add a separate layer for histogram
-        var x = d3.scale.linear()
-            .range([0, width]);
-        var y = d3.scale.linear()
-            .range([height, 0]);
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
-
-        hsvg = d3.select(target).append("svg")
-            .attr("id", "histogram")
-            .attr("width", width)
-            .attr("height", height);
-
-        hsvg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        hsvg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end");
-
-        x.domain([0, 255]);
-        y.domain([0.0, 1.0]);
-
-        area = d3.svg.area()
-            .x(function(d) { return x(d.lev); })
-            .y0(height)
-            .y1(function(d) { return y(d.cnt); });
-        hsvg.append("path")
-            .datum(hist)
-            .attr("class", "area")
-            .attr("d", area);
+        if( !target ) {
+            throw "failed to initialize curve tool";
+        }
 
         // add the curve tool
         svg = d3.select(target).append("svg")

@@ -4,6 +4,11 @@
 
 var clamp = function(v, lower, upper) {
     return Math.max(lower, Math.min(v, upper));
+};
+
+// build histogram for each channel separately
+function colorHistogram(img, x1, y1, x2, y2, num_bins) {
+
 }
 
 // build histogram of specified image region
