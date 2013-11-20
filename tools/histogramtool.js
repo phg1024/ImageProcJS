@@ -125,6 +125,7 @@ var HistogramTool = function() {
 
         svg = d3.select(target).append("svg")
             .attr("id", "histogram")
+            .attr("class", "back")
             .attr("width", width)
             .attr("height", height);
 

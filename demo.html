@@ -5,35 +5,35 @@
     <title>ImageProcJS</title>
     <link rel='stylesheet' type='text/css' href='css/style.css' media="screen, print, projection">
 
-	<!-- External libraries -->
+    <!-- External libraries -->
     <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="d3.v3.min.js"></script>
-	
-	<!-- Peihong's library -->
+    <script type="text/javascript" src="d3.v3.min.js"></script>
+
+    <!-- Peihong's library -->
     <script type="text/javascript" src="mathutils.js"></script>
-	<script type="text/javascript" src="color.js"></script>
-	<script type="text/javascript" src="image.js"></script>
-	<script type="text/javascript" src="filter.js"></script>
-	<script type="text/javascript" src="curve.js"></script>
-	<script type="text/javascript" src="tools/curvetool.js"></script>
+    <script type="text/javascript" src="color.js"></script>
+    <script type="text/javascript" src="image.js"></script>
+    <script type="text/javascript" src="filter.js"></script>
+    <script type="text/javascript" src="curve.js"></script>
+    <script type="text/javascript" src="tools/curvetool.js"></script>
     <script type="text/javascript" src="tools/histogramtool.js"></script>
-	<script type="text/javascript" src="imageloader.js"></script>
-	<script type="text/javascript" src="utils.js"></script>
-	<script>
-		var context, canvas;
+    <script type="text/javascript" src="imageloader.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script>
+        var context, canvas;
         var curvetool, histtool;
-		var loader;
-		window.onload = function() {
+        var loader;
+        window.onload = function() {
             loader = new ImageLoader();
-			canvas = document.getElementById('cvs');
-			context = canvas.getContext('2d');
+            canvas = document.getElementById('cvs');
+            context = canvas.getContext('2d');
             curvetool = new CurveTool();
             histtool = new HistogramTool();
             histtool.init('#div_curvetool', 'rgb');
             curvetool.init('#div_curvetool');
 
             $(document).on("curvechanged", function(evt) {
-               console.log('curve changed.');
+                console.log('curve changed.');
                 var I = loader.result;
                 I = filters.curve(I, curvetool.getLUT(), $('#channelselect').val());
                 I.render(canvas);
@@ -51,17 +51,17 @@
                 I.render(canvas);
                 histtool.bindImage( I );
             });
-			
-			$('#show_btn').click( function() {
+
+            $('#show_btn').click( function() {
                 loader.loadImage('seal.jpg', canvas);
-			});
-			
-			$('#gs_btn').click( function() {
+            });
+
+            $('#gs_btn').click( function() {
                 var I = loader.result;
-				I = filters.grayscale(I);
-				I.render(canvas);
+                I = filters.grayscale(I);
+                I.render(canvas);
                 histtool.bindImage( I );
-			});
+            });
 
             $('#hist_btn').click(function() {
                 var I = loader.result;
@@ -105,55 +105,66 @@
                 I.render(canvas);
                 histtool.bindImage( I );
             });
-			
-			$('#files').change( function( e ){
-				handleFileSelect(e, loader, canvas);
-			});
-		}
-	</script>
+
+            $('#files').change( function( e ){
+                handleFileSelect(e, loader, canvas);
+            });
+        }
+    </script>
 </head>
 <body>
-<button id="show_btn">Show Remote Image</button>
-<div>
-<table>
-    <tr>
-        <td><button id="gs_btn">Show Grayscale</button></td>
-    </tr>
-    <tr>
-        <td><button id="hist_btn">Histogram Equalization</button></td>
-    </tr>
-    <tr>
-        <td><button id="ahe_btn">Adaptive Histogram Equalization</button></td>
-    </tr>
-    <tr>
-        <td><input type="checkbox" id="brightnesscontrast">Brightness & Contrast</td>
-    </tr>
-    <tr>
-        <td><input type="range" id="brightnessbar" min="-128" max="128" value="0">Brightness</td><td><p id="brightnessval"></p></td>
-    </tr>
-    <tr>
-        <td><input type="range" id="contrastbar" min="-128" max="128" value="0">Contrast</td><td><p id="contrastval"></p></td>
-    </tr>
-</table>
-</div>
-Upload image:
-<input type="file" id="files" name="files[]" />
-<output id="list"></output>
-
-<p id='imageinfo'></p>
-<div>
-    <div>
-        <canvas id="cvs"></canvas>
+<header>ImageProcJS Demo</header>
+<article>
+    <div class="content">
+        <button id="show_btn">Show Remote Image</button>
+        Upload image:
+        <input type="file" id="files" name="files[]" />
+        <output id="list"></output>
+        <div>
+            Tools:
+            <table>
+                <tr>
+                    <td><button id="gs_btn">Show Grayscale</button></td>
+                </tr>
+                <tr>
+                    <td><button id="hist_btn">Histogram Equalization</button></td>
+                </tr>
+                <tr>
+                    <td><button id="ahe_btn">Adaptive Histogram Equalization</button></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" id="brightnesscontrast">Brightness & Contrast</td>
+                </tr>
+                <tr>
+                    <td><input type="range" id="brightnessbar" min="-128" max="128" value="0">Brightness</td><td><p id="brightnessval"></p></td>
+                </tr>
+                <tr>
+                    <td><input type="range" id="contrastbar" min="-128" max="128" value="0">Contrast</td><td><p id="contrastval"></p></td>
+                </tr>
+            </table>
+        </div>
+        <p id='imageinfo'></p>
+        <div>
+            <div id='div_canvas'>
+                <canvas id="cvs"></canvas>
+            </div>
+            <div id='div_curvetool'>
+                <div>
+                    <button id="resetcurve_btn">Reset Curve</button>
+                    <select id="channelselect">
+                        <option value="brightness">Brightness</option>
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
+                    </select><br>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id='div_curvetool'>
-        <button id="resetcurve_btn">Reset Curve</button>
-        <select id="channelselect">
-            <option value="brightness">Brightness</option>
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="blue">Blue</option>
-        </select><br>
-    </div>
-</div>
+</article>
+<footer>
+    Last Modified: <script type="text/javascript">document.write(document.lastModified)</script><br>
+    &copy 2009-2013, Peihong Guo
+</footer>
 </body>
 </html>
