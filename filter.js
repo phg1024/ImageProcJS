@@ -207,5 +207,31 @@ var filters = {
 				});
 			}
 		}
-	}
+	},
+    'reduction' : function(src, method, colors) {
+        switch(method) {
+            case 'uniform': {
+                var levs = Math.ceil(Math.pow(colors, 1.0/3.0));
+                return src.map(function(c) {
+                    var r = c.r, g = c.g, b = c.b;
+                    r = Math.round(Math.round((r / 255.0) * levs) / levs * 255.0);
+                    g = Math.round(Math.round((g / 255.0) * levs) / levs * 255.0);
+                    b = Math.round(Math.round((b / 255.0) * levs) / levs * 255.0);
+                    return new Color(r, g, b, c.a);
+                });
+            }
+            case 'population': {
+                break;
+            }
+            case 'mediancut': {
+                break;
+            }
+            case 'knn': {
+                break;
+            }
+            case 'ann': {
+                break;
+            }
+        }
+    }
 };

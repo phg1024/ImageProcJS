@@ -77,6 +77,15 @@
                 histtool.bindImage( I );
             });
 
+            $('#reduction_btn').click(function() {
+                var I = loader.result;
+                var m = $('#reduction_method').val();
+                var colors = parseFloat($('#reduction_colors').val());
+                I = filters.reduction(I, m, colors);
+                I.render(canvas);
+                histtool.bindImage( I );
+            })
+
             $('#brightnessbar').change( function() {
                 var beta = parseInt($('#brightnessbar').val());
                 $('#brightnessval').html(beta);
@@ -140,6 +149,17 @@
                 </tr>
                 <tr>
                     <td><input type="range" id="contrastbar" min="-128" max="128" value="0">Contrast</td><td><p id="contrastval"></p></td>
+                </tr>
+                <tr>
+                    <td><button id="reduction_btn">Color Reduction</button></td>
+                    <td><select id="reduction_method">
+                        <option value="uniform">Uniform</option>
+                        <option value="population">Population</option>
+                        <option value="mediancut">Median-Cut</option>
+                        <option value="knn">kNN</option>
+                        <option value="ann">ANN</option>
+                    </select></td>
+                    <td><input type="text" id="reduction_colors" value="4"></td>
                 </tr>
             </table>
         </div>
