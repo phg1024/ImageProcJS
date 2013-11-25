@@ -74,3 +74,39 @@ function buildcdf( hist, num_bins )
 
     return cumuhist;
 }
+
+function normalizecdf( cdf, num_bins ) {
+    if( num_bins == undefined )
+        num_bins = 256;
+
+    var total = cdf[num_bins-1];
+    var ncdf = new Array(num_bins);
+    for(var i=0;i<num_bins;i++)
+        ncdf[i] = cdf[i] / total;
+
+    return ncdf;
+}
+
+// list is a sorted list, use binary search
+function findClosest(val, list) {
+    var r = list.length - 1;
+    var l = 0;
+
+    while( l <= r ) {
+        var m = Math.round((r+l)/2);
+        if( val > list[m] ) {
+            l = m+1;
+        } else if( val < list[m] ) {
+            r = m-1;
+        }
+        else {
+            return list[m];
+        }
+    }
+
+    l = clamp(l, 0, list.length-1);
+    r = clamp(r, 0, list.length-1);
+
+    if( Math.abs(list[l] - val) < Math.abs(list[r] - val) ) return list[l];
+    else return list[r];
+}

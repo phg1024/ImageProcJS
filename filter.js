@@ -221,6 +221,51 @@ var filters = {
                 });
             }
             case 'population': {
+                var hist = colorHistogram(src, 0, 0, src.w, src.h);
+                var rcdf = normalizecdf( buildcdf(hist[0]) );
+                var gcdf = normalizecdf( buildcdf(hist[1]) );
+                var bcdf = normalizecdf( buildcdf(hist[2]) );
+
+                var levels = Math.ceil(Math.pow(colors, 1.0/3.0));
+
+                // get sample points using CDF
+                var genSamples = function(cdf) {
+                    var pts = [];
+                    var step = (1.0 - cdf[0]) / levels;
+
+                    for(var j=0;j<=levels;j++) {
+                        var p = step * j + cdf[0];
+                        for(var i=1;i<256;i++) {
+                            if( cdf[i-1] <= p && cdf[i] >= p ) {
+                                pts.push(i);
+                                break;
+                            }
+                        }
+                    }
+                    return pts;
+                }
+
+                // sample points in each channel
+                var rPoints = genSamples(rcdf),
+                    gPoints = genSamples(gcdf),
+                    bPoints = genSamples(bcdf);
+
+                // assemble the samples to a color table
+                return src.map(function(c) {
+                    var r = c.r, g = c.g, b = c.b;
+
+                    // find closet r sample point
+                    r = findClosest(c.r, rPoints);
+
+                    // find closet g sample point
+                    g = findClosest(c.g, gPoints);
+
+                    // find closet b sample point
+                    b = findClosest(c.b, bPoints);
+
+                    return new Color(r, g, b, c.a);
+                });
+
                 break;
             }
             case 'mediancut': {
