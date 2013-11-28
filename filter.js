@@ -1,26 +1,31 @@
 var filters = {
-    'grayscale' : function( src ) {
+    grayscale : function( src ) {
         return src.map(function( c ) {
             var lev = Math.round((c.r * 299 + c.g * 587 + c.b * 114) / 1000);
             c.r = c.g = c.b = lev;
             return c;
         });
     },
-    'brightness' : function( src, val ) {
+    invert : function( src ) {
+        return src.map(function( c ) {
+            return new Color(255- c.r, 255- c.g, 255- c.b, c.a);
+        });
+    },
+    brightness : function( src, val ) {
         var dc = new Color(val, val, val, 0);
         return src.map(function( c ) {
             var nc = c.add(dc);
             return nc.clamp();
         });
     },
-    'contrast' : function( src, val ) {
+    contrast : function( src, val ) {
         var factor = Math.max((128 + val) / 128, 0);
         return src.map(function( c0 ) {
             var c = c0.mulc(factor);
             return c.clamp();
         });
     },
-    'brightnesscontrast' : function( src, alpha, beta ) {
+    brightnesscontrast : function( src, alpha, beta ) {
         var factor = Math.max((128 + alpha) / 128, 0);
         var dc = new Color(beta, beta, beta, 0);
         return src.map(function( c0 ) {
@@ -28,7 +33,7 @@ var filters = {
             return c.clamp();
         });
     },
-    'histogram' : function( src ) {
+    histogram : function( src ) {
         // histogram equalization, blended with orignal image
         // amount is between 0 and 1
         var h = src.h, w = src.w;
@@ -51,7 +56,7 @@ var filters = {
             return c0.mulc(ratio).clamp().round();
         });
     },
-    'ahe' : function( src ) {
+    ahe : function( src ) {
         // find a good window size
         var h = src.h, w = src.w;
 
@@ -138,7 +143,7 @@ var filters = {
         return dst;
     },
     // lut is the look up table defined by the input curve
-    'curve' : function(src, lut, channel) {
+    curve : function(src, lut, channel) {
         switch( channel )
         {
             case 'red':
@@ -175,7 +180,7 @@ var filters = {
             }
         }
     },
-    'reduction' : function(src, method, colors) {
+    reduction : function(src, method, colors) {
         switch(method) {
             case 'uniform': {
                 var levs = Math.ceil(Math.pow(colors, 1.0/3.0));

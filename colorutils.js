@@ -86,7 +86,7 @@ function hsv2rgb( c ){
             case 5:r=v; g=p; b=q; break;
         }
     }
-    return {r:r,g:g,b:b};
+    return {r:r * 255, g:g * 255, b:b * 255};
 }
 
 var clamp = function(v, lower, upper) {

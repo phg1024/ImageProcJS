@@ -16,6 +16,7 @@
     <script type="text/javascript" src="color.js"></script>
     <script type="text/javascript" src="image.js"></script>
     <script type="text/javascript" src="filter.js"></script>
+    <script type="text/javascript" src="effects.js"></script>
     <script type="text/javascript" src="curve.js"></script>
     <script type="text/javascript" src="tools/curvetool.js"></script>
     <script type="text/javascript" src="tools/histogramtool.js"></script>
@@ -61,6 +62,13 @@
             $('#gs_btn').click( function() {
                 var I = loader.result;
                 I = filters.grayscale(I);
+                I.render(canvas);
+                histtool.bindImage( I );
+            });
+
+            $('#invert_btn').click( function() {
+                var I = loader.result;
+                I = filters.invert(I);
                 I.render(canvas);
                 histtool.bindImage( I );
             });
@@ -120,6 +128,21 @@
             $('#files').change( function( e ){
                 handleFileSelect(e, loader, canvas);
             });
+
+            $('#sepia_btn').click(function(e) {
+                var I = loader.result;
+                I = effects.sepia(I);
+                I.render(canvas);
+                histtool.bindImage( I );
+            });
+
+            $('#autumn_btn').click(function(e) {
+                var I = loader.result;
+                I = effects.autumn(I);
+                I.render(canvas);
+                histtool.bindImage( I );
+            });
+
         }
     </script>
 </head>
@@ -132,10 +155,13 @@
         <input type="file" id="files" name="files[]" />
         <output id="list"></output>
         <div>
-            Tools:
+            Filters:
             <table>
                 <tr>
                     <td><button id="gs_btn">Show Grayscale</button></td>
+                </tr>
+                <tr>
+                    <td><button id="invert_btn">Invert</button></td>
                 </tr>
                 <tr>
                     <td><button id="hist_btn">Histogram Equalization</button></td>
@@ -163,6 +189,11 @@
                     </select></td>
                     <td><input type="text" id="reduction_colors" value="4"></td>
                 </tr>
+            </table>
+            Effects:
+            <table>
+                <tr><td><button id="sepia_btn" class="effect_btn" value="sepia">Sepia</button></td></tr>
+                <tr><td><button id="autumn_btn" class="effect_btn" value="autumn">Autumn</button></td></tr>
             </table>
         </div>
         <p id='imageinfo'></p>
