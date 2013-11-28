@@ -90,8 +90,8 @@ function mediancut( src, n ) {
     var w = src.w, h = src.h;
     // get all color samples from the source image
     var inColors = {};
-    for(var y= 0, idx=0;y<h;y++) {
-        for(var x=0;x<w;x++,idx+=4) {
+    for(var y= 0;y<h;y++) {
+        for(var x=0;x<w;x++) {
             var c = src.getPixel(x, y);
             var hex = rgb2hex(c);
 

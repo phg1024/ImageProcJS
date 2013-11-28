@@ -2,6 +2,8 @@
  * Created by Peihong Guo on 11/28/13.
  */
 var algorithms = {};
-require(["algorithms/mediancut"], function() {
+require(["algorithms/mediancut", "algorithms/kmeans", "algorithms/neuralnetwork"], function() {
     algorithms.mediancut = mediancut;
+    algorithms.kmeans = kmeans;
+    algorithms.neuralnetwork = neuralnetwork;
 });

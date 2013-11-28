@@ -239,10 +239,18 @@ var filters = {
                 });
             }
             case 'knn': {
-                break;
+                var colormap = algorithms.kmeans(src, colors);
+                return src.map(function(c) {
+                    var nc = findClosestColor(c, colormap);
+                    return new Color(nc.r, nc.g, nc.b, c.a);
+                });
             }
             case 'ann': {
-                break;
+                var colormap = algorithms.neuralnetwork(src, colors);
+                return src.map(function(c) {
+                    var nc = findClosestColor(c, colormap);
+                    return new Color(nc.r, nc.g, nc.b, c.a);
+                });
             }
         }
     }
