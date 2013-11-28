@@ -1,7 +1,8 @@
 var ImageLoader = function(mw){
     this.maxEdge = mw || 640;
-
     this.result = undefined;
+
+    // load an image with the specified canvas object
     this.loadImage = function( imgsrc, cvs ){
         var that = this;
         // create an Image object

@@ -71,7 +71,7 @@ var HistogramTool = function() {
                         hist[c][i].cnt *= factor;
                     }
             
-                    console.log(hist[c]);   
+                    //console.log(hist[c]);
                 }
                 
                 break;

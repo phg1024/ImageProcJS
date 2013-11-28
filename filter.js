@@ -1,85 +1,55 @@
 var filters = {
-	'grayscale' : function( src ) {
-		if( src.type === 'RGBAImage' ) {
-			return src.map(function( c ) {				
-				var lev = Math.round((c.r * 299 + c.g * 587 + c.b * 114) / 1000);
-				c.r = c.g = c.b = lev;
-				return c;
-			});
-		}
-		else {
-			throw "Not a RGBA image!";
-		}
-	},
+    'grayscale' : function( src ) {
+        return src.map(function( c ) {
+            var lev = Math.round((c.r * 299 + c.g * 587 + c.b * 114) / 1000);
+            c.r = c.g = c.b = lev;
+            return c;
+        });
+    },
     'brightness' : function( src, val ) {
-        if( src.type === 'RGBAImage' ) {
-            var dc = new Color(val, val, val, 0);
-            return src.map(function( c ) {
-                var nc = c.add(dc);
-                return nc.clamp();
-            });
-        }
-        else {
-            throw "Not a RGBA image!";
-        }
+        var dc = new Color(val, val, val, 0);
+        return src.map(function( c ) {
+            var nc = c.add(dc);
+            return nc.clamp();
+        });
     },
     'contrast' : function( src, val ) {
-        if( src.type === 'RGBAImage' ) {
-            var factor = Math.max((128 + val) / 128, 0);
-            return src.map(function( c0 ) {
-                var c = c0.mulc(factor);
-                return c.clamp();
-            });
-        }
-        else {
-            throw "Not a RGBA image!";
-        }
+        var factor = Math.max((128 + val) / 128, 0);
+        return src.map(function( c0 ) {
+            var c = c0.mulc(factor);
+            return c.clamp();
+        });
     },
     'brightnesscontrast' : function( src, alpha, beta ) {
-        if( src.type === 'RGBAImage' ) {
-            var factor = Math.max((128 + alpha) / 128, 0);
-            var dc = new Color(beta, beta, beta, 0);
-            return src.map(function( c0 ) {
-                var c = c0.mulc(factor).add(dc);
-                return c.clamp();
-            });
-        }
-        else {
-            throw "Not a RGBA image!";
-        }
+        var factor = Math.max((128 + alpha) / 128, 0);
+        var dc = new Color(beta, beta, beta, 0);
+        return src.map(function( c0 ) {
+            var c = c0.mulc(factor).add(dc);
+            return c.clamp();
+        });
     },
-    'histogram': function( src ) {
-        if( src.type === 'RGBAImage' ) {
+    'histogram' : function( src ) {
+        // histogram equalization, blended with orignal image
+        // amount is between 0 and 1
+        var h = src.h, w = src.w;
 
-            // histogram equalization, blended with orignal image
-            // amount is between 0 and 1
-            var h = src.h, w = src.w;
+        // grayscale image
+        var gimg = filters.grayscale(src);
 
-            // grayscale image
-            var gimg = filters.grayscale(src);
+        // build histogram (pdf)
+        var hist = histogram(gimg, 0, 0, w, h);
 
-            // build histogram (pdf)
-            var hist = histogram(gimg, 0, 0, w, h);
+        // compute cdf
+        var cdf = buildcdf( hist );
+        var cumuhist = normalizecdf(cdf, 255);
 
-            // compute cdf
-            var cumuhist = buildcdf( hist );
-
-            // normalize cdf
-            var total = cumuhist[255];
-            for(var i=0;i<256;i++)
-                cumuhist[i] = Math.round(cumuhist[i] / total * 255.0);
-
-            // equalize
-            return src.map(function(c0){
-                var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
-                var cI = cumuhist[lev];
-                var ratio = cI / lev;
-                return c0.mulc(ratio).clamp().round();
-            });
-        }
-        else {
-            throw "Not a RGBA image!";
-        }
+        // equalize
+        return src.map(function(c0){
+            var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
+            var cI = cumuhist[lev];
+            var ratio = cI / lev;
+            return c0.mulc(ratio).clamp().round();
+        });
     },
     'ahe' : function( src ) {
         // find a good window size
@@ -117,10 +87,7 @@ var filters = {
                 var hist = histogram(gimg, x0, y0, x1, y1, num_bins);
 
                 var cdf = buildcdf( hist );
-
-                var total = cdf[255];
-                for(var k=0;k<256;k++)
-                    cdf[k] = Math.round(cdf[k] / total * 255.0);
+                cdf = normalizecdf(cdf, 255);
 
                 cdfs[i][j] = cdf;
             }
@@ -170,53 +137,53 @@ var filters = {
 
         return dst;
     },
-	// lut is the look up table defined by the input curve
-	'curve' : function(src, lut, channel) { 
-		switch( channel )
-		{
-		case 'red':
-			{
-				return src.map(function(c0) {
-					var c = new Color(lut[c0.r], c0.g, c0.b, c0.a);
-					return c.round().clamp();
-				});
-			}
-		case 'green':
-			{
-				return src.map(function(c0) {
-					var c = new Color(c0.r, lut[c0.g], c0.b, c0.a);
-					return c.round().clamp();
-				});
-			}
-		case 'blue':
-			{
-				return src.map(function(c0) {
-					var c = new Color(c0.r, c0.g, lut[c0.b], c0.a);
-					return c.round().clamp();
-				});
-			}
-		case 'brightness':
-		default:
-			{
-				return src.map(function(c0) {
-					var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
-					var bias = 1e-6;			// prevent divide by zero
-					var ratio = lut[lev]/(lev + bias);
-					var c = c0.mulc(ratio);
-					return c.round().clamp();
-				});
-			}
-		}
-	},
+    // lut is the look up table defined by the input curve
+    'curve' : function(src, lut, channel) {
+        switch( channel )
+        {
+            case 'red':
+            {
+                return src.map(function(c0) {
+                    var c = new Color(lut[c0.r], c0.g, c0.b, c0.a);
+                    return c.round().clamp();
+                });
+            }
+            case 'green':
+            {
+                return src.map(function(c0) {
+                    var c = new Color(c0.r, lut[c0.g], c0.b, c0.a);
+                    return c.round().clamp();
+                });
+            }
+            case 'blue':
+            {
+                return src.map(function(c0) {
+                    var c = new Color(c0.r, c0.g, lut[c0.b], c0.a);
+                    return c.round().clamp();
+                });
+            }
+            case 'brightness':
+            default:
+            {
+                return src.map(function(c0) {
+                    var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
+                    var bias = 1e-6;			// prevent divide by zero
+                    var ratio = lut[lev]/(lev + bias);
+                    var c = c0.mulc(ratio);
+                    return c.round().clamp();
+                });
+            }
+        }
+    },
     'reduction' : function(src, method, colors) {
         switch(method) {
             case 'uniform': {
                 var levs = Math.ceil(Math.pow(colors, 1.0/3.0));
+                var round = Math.round;
                 return src.map(function(c) {
-                    var r = c.r, g = c.g, b = c.b;
-                    r = Math.round(Math.round((r / 255.0) * levs) / levs * 255.0);
-                    g = Math.round(Math.round((g / 255.0) * levs) / levs * 255.0);
-                    b = Math.round(Math.round((b / 255.0) * levs) / levs * 255.0);
+                    var r = round(round((c.r / 255.0) * levs) / levs * 255.0);
+                    var g = round(round((c.g / 255.0) * levs) / levs * 255.0);
+                    var b = round(round((c.b / 255.0) * levs) / levs * 255.0);
                     return new Color(r, g, b, c.a);
                 });
             }
@@ -243,7 +210,7 @@ var filters = {
                         }
                     }
                     return pts;
-                }
+                };
 
                 // sample points in each channel
                 var rPoints = genSamples(rcdf),
@@ -252,24 +219,24 @@ var filters = {
 
                 // assemble the samples to a color table
                 return src.map(function(c) {
-                    var r = c.r, g = c.g, b = c.b;
-
                     // find closet r sample point
-                    r = findClosest(c.r, rPoints);
+                    var r = findClosest(c.r, rPoints);
 
                     // find closet g sample point
-                    g = findClosest(c.g, gPoints);
+                    var g = findClosest(c.g, gPoints);
 
                     // find closet b sample point
-                    b = findClosest(c.b, bPoints);
+                    var b = findClosest(c.b, bPoints);
 
                     return new Color(r, g, b, c.a);
                 });
-
-                break;
             }
             case 'mediancut': {
-                break;
+                var colormap = algorithms.mediancut(src, colors);
+                return src.map(function(c) {
+                    var nc = findClosestColor(c, colormap);
+                    return new Color(nc.r, nc.g, nc.b, c.a);
+                });
             }
             case 'knn': {
                 break;

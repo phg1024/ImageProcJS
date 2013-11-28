@@ -14,7 +14,7 @@ function handleFileSelect(evt, imgloader, cvs) {
     }
 
     function uploadImage( file, cvs ) {
-        var fr, img;
+        var fr;
 
         if (typeof window.FileReader !== 'function') {
             write("The file API isn't supported on this browser yet.");

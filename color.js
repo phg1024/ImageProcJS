@@ -32,6 +32,14 @@ Color.prototype.setColor = function(that)
         return null;
 };
 
+Color.prototype.distance = function( that ) {
+    var dr = this.r - that.r;
+    var dg = this.g - that.g;
+    var db = this.b - that.b;
+
+    return (dr * dr + dg * dg + db * db);
+};
+
 Color.prototype.equal = function( that ) {
     return (this.r == that.r && this.g == that.g && this.b == that.b);
 };
