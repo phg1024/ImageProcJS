@@ -48,8 +48,18 @@ Color.prototype.add = function(that) {
     return new Color(this.r + that.r, this.g + that.g, this.b + that.b, this.a + that.a);
 };
 
+// only r, g, b channels are modified
+Color.prototype.addc = function(that) {
+    return new Color(this.r + that.r, this.g + that.g, this.b + that.b, this.a);
+};
+
 Color.prototype.sub = function(that) {
     return new Color(this.r - that.r, this.g - that.g, this.b - that.b, this.a - that.a);
+};
+
+// only r, g, b channels are modified
+Color.prototype.subc = function(that) {
+    return new Color(this.r - that.r, this.g - that.g, this.b - that.b, this.a);
 };
 
 Color.prototype.mul = function(c)
@@ -60,6 +70,25 @@ Color.prototype.mul = function(c)
 // only r, g, b channels are modified
 Color.prototype.mulc = function(c) {
     return new Color(this.r * c, this.g * c, this.b * c, this.a);
+};
+
+Color.prototype.div = function(c) {
+    var invC = 1.0 / c;
+    return this.mul(invC);
+};
+
+Color.prototype.divc = function(c) {
+    var invC = 1.0 / c;
+    return this.mulc(invC);
+};
+
+Color.prototype.normalize = function() {
+    var invA = 1.0 / this.a;
+    this.r *= invA;
+    this.g *= invA;
+    this.b *= invA;
+
+    return this;
 };
 
 Color.prototype.clamp = function() {
@@ -81,4 +110,17 @@ Color.prototype.round = function() {
 Color.interpolate = function(c1, c2, t)
 {
     return c1.mul(t).add(c2.mul(1-t));
+};
+
+Color.rand = function() {
+    return new Color(
+        Math.random() * 255,
+        Math.random() * 255,
+        Math.random() * 255,
+        Math.random() * 255
+    );
+};
+
+Color.zero = function() {
+    return new Color(0, 0, 0, 0);
 };

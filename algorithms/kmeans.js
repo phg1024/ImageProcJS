@@ -1,6 +1,117 @@
 /**
  * Created by Peihong Guo on 11/28/13.
  */
+
+function computeCentroids( samples, n ) {
+    var centroids = new Array(n);
+    for(var j=0;j<n;j++) {
+        centroids[j] = Color.zero();
+    }
+
+    for(var i=0;i<samples.length;i++) {
+        var c = samples[i].cluster;
+        centroids[c] = centroids[c].addc(samples[i]);
+        centroids[c].a++;
+    }
+
+    var maxCluster = 0, maxCount = 0;
+    for(var j=0;j<n;j++) {
+        if( centroids[j].a == 0 ) {
+            // randomly reinitialize this centroid
+            centroids[j] = Color.rand();
+            continue;
+        }
+        centroids[j].normalize();
+
+        if( centroids[j].a > maxCount )
+        {
+            maxCluster = j;
+            maxCount = centroids[j].a;
+        }
+    }
+
+    return {
+        centroids: centroids,
+        maxCluster: maxCluster,
+        maxCount: maxCount
+    }
+}
+
+function assignClusters( samples, centroids ) {
+    var moveCount = 0;
+    for(var i=0;i<samples.length;i++) {
+        var idx, minDist = Number.MAX_VALUE;
+        for(var j=0;j<centroids.length;j++) {
+            var dr = samples[i].r - centroids[j].r;
+            var dg = samples[i].g - centroids[j].g;
+            var db = samples[i].b - centroids[j].b;
+            var dist = dr * dr + dg * dg + db * db;
+            if( dist < minDist ) {
+                minDist = dist;
+                idx = j;
+            }
+        }
+
+        if( idx != samples[i].cluster ) {
+            moveCount++;
+        }
+
+        samples[i].cluster = idx;
+    }
+
+    return {
+        samples: samples,
+        moveCount: moveCount
+    };
+}
+
+function initkmeans( inColors, n ) {
+    var centroids = [];
+    centroids.push( Color.rand() );
+
+    var rand = function(a, b) {
+        return a + Math.random() * (b-a);
+    };
+
+    var m = 32;
+    var initsamples = [];
+    while( centroids.length < n ) {
+        // add m samples from the input color
+        for(var i=0;i<m;i++) {
+            initsamples.push(inColors[Math.round(Math.random() * (inColors.length - 1))]);
+        }
+
+        // assign the samples to the clusters
+        var initsamples = assignClusters(initsamples, centroids).samples;
+
+        // compute the new centroids
+        var nc = computeCentroids( initsamples, centroids.length );
+        var centroids = nc.centroids;
+
+        // split the largest cluster
+        var moveSize = 20;
+        var newcentroid = centroids[nc.maxCluster].addc(new Color(
+            rand(-0.5, 0.5) * moveSize,
+            rand(-0.5, 0.5) * moveSize,
+            rand(-0.5, 0.5) * moveSize,
+            0)
+        );
+
+        // move the centroid a little
+        centroids[nc.maxCluster] = centroids[nc.maxCluster].addc(
+            new Color(
+                rand(-0.5, 0.5) * moveSize,
+                rand(-0.5, 0.5) * moveSize,
+                rand(-0.5, 0.5) * moveSize,
+                0
+            )
+        );
+        centroids.push(newcentroid);
+    }
+
+    return centroids;
+}
+
 function kmeans(src, n, sr) {
     var h = src.h, w = src.w;
     var inColors = [];
@@ -20,145 +131,25 @@ function kmeans(src, n, sr) {
     }
 
     // initialize the centroids
-    var centroids = [];
-    centroids.push( {
-        r: Math.random() * 255,
-        g: Math.random() * 255,
-        b: Math.random() * 255
-    })
-
-    var m = 32;
-    var initsamples = [];
-    while( centroids.length < n ) {
-        // get m samples from the input color
-        for(var i=0;i<m;i++) {
-            initsamples.push(inColors[Math.round(Math.random() * (inColors.length - 1))]);
-        }
-
-        // assign the samples to the clusters
-        for(var i=0;i<initsamples.length;i++) {
-            var idx, minDist = Number.MAX_VALUE;
-            for(var j=0;j<centroids.length;j++) {
-                var dr = initsamples[i].r - centroids[j].r;
-                var dg = initsamples[i].g - centroids[j].g;
-                var db = initsamples[i].b - centroids[j].b;
-                var dist = dr * dr + dg * dg + db * db;
-                if( dist < minDist ) {
-                    minDist = dist;
-                    idx = j;
-                }
-            }
-            initsamples[i].cluster = idx;
-        }
-
-        // compute the new centroids
-        for(var j=0;j<centroids.length;j++) {
-            centroids[j].r = 0;
-            centroids[j].g = 0;
-            centroids[j].b = 0;
-            centroids[j].count = 0;
-        }
-        for(var i=0;i<initsamples.length;i++) {
-            var c = initsamples[i].cluster;
-            centroids[c].r += initsamples[i].r;
-            centroids[c].g += initsamples[i].g;
-            centroids[c].b += initsamples[i].b;
-            centroids[c].count++;
-        }
-        var maxCluster = 0, maxCount = 0;
-        for(var j=0;j<centroids.length;j++) {
-            if( centroids[j].count == 0 ) {
-                // randomly reinitialize this centroid
-                centroids[j] = {
-                    r: Math.random() * 255,
-                    g: Math.random() * 255,
-                    b: Math.random() * 255
-                };
-                continue;
-            }
-
-            centroids[j].r /= centroids[j].count;
-            centroids[j].g /= centroids[j].count;
-            centroids[j].b /= centroids[j].count;
-
-            if( centroids[j].count > maxCount )
-            {
-                maxCluster = j;
-                maxCount = centroids[j].count;
-            }
-        }
-
-        // split the largest cluster
-        var moveSize = 20;
-        var newcentroid = {
-            r: centroids[maxCluster].r + (Math.random() - 0.5) * moveSize,
-            g: centroids[maxCluster].g + (Math.random() - 0.5) * moveSize,
-            b: centroids[maxCluster].b + (Math.random() - 0.5) * moveSize
-        };
-
-        centroids[maxCluster].r += (Math.random() - 0.5) * moveSize;
-        centroids[maxCluster].g += (Math.random() - 0.5) * moveSize;
-        centroids[maxCluster].b += (Math.random() - 0.5) * moveSize;
-        centroids.push(newcentroid);
-    }
+    var centroids = initkmeans(inColors, n);
 
     // k-means
     var THRES = 32;
-    var MAX_ITERS = 32;
+    var MAX_ITERS = 2048;
     var iters = 0;
     var moveCount = Number.MAX_VALUE;
     while( moveCount > THRES && iters < MAX_ITERS ) {
         iters++;
-        moveCount = 0;
 
         // assign samples to clusters
-        for(var i=0;i<samples.length;i++) {
-            var idx, minDist = Number.MAX_VALUE;
-            for(var j=0;j<centroids.length;j++) {
-                var dr = samples[i].r - centroids[j].r;
-                var dg = samples[i].g - centroids[j].g;
-                var db = samples[i].b - centroids[j].b;
-                var dist = dr * dr + dg * dg + db * db;
-                if( dist < minDist ) {
-                    minDist = dist;
-                    idx = j;
-                }
-            }
-            if( idx != samples[i].cluster ) {
-                moveCount++;
-            }
-            samples[i].cluster = idx;
-        }
+        var ns = assignClusters( samples, centroids);
+        samples = ns.samples;
+        moveCount = ns.moveCount;
+
+        console.log(moveCount);
 
         // update centroids
-        for(var j=0;j<centroids.length;j++) {
-            centroids[j].r = 0;
-            centroids[j].g = 0;
-            centroids[j].b = 0;
-            centroids[j].count = 0;
-        }
-        for(var i=0;i<initsamples.length;i++) {
-            var c = initsamples[i].cluster;
-            centroids[c].r += initsamples[i].r;
-            centroids[c].g += initsamples[i].g;
-            centroids[c].b += initsamples[i].b;
-            centroids[c].count++;
-        }
-        for(var j=0;j<centroids.length;j++) {
-            if( centroids[j].count == 0 ) {
-                // randomly reinitialize this centroid
-                centroids[j] = {
-                    r: Math.random() * 255,
-                    g: Math.random() * 255,
-                    b: Math.random() * 255
-                };
-                continue;
-            }
-
-            centroids[j].r /= centroids[j].count;
-            centroids[j].g /= centroids[j].count;
-            centroids[j].b /= centroids[j].count;
-        }
+        centroids = computeCentroids( samples, n).centroids;
     }
 
     console.log('iters = ' + iters);
