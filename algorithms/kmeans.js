@@ -146,7 +146,7 @@ function kmeans(src, n, sr) {
         samples = ns.samples;
         moveCount = ns.moveCount;
 
-        console.log(moveCount);
+        //console.log(moveCount);
 
         // update centroids
         centroids = computeCentroids( samples, n).centroids;

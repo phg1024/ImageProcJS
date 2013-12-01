@@ -143,6 +143,21 @@
                 histtool.bindImage( I );
             });
 
+            $("input[name='opradio']").change(function(){
+                console.log($("input[name='opradio']:checked").val());
+                switch ( $("input[name='opradio']:checked").val() ) {
+                    case 'filters': {
+                        $('#div_filters').show();
+                        $('#div_effects').hide();
+                        break;
+                    }
+                    case 'effects': {
+                        $('#div_filters').hide();
+                        $('#div_effects').show();
+                        break;
+                    }
+                }
+            });
         }
     </script>
 </head>
@@ -155,7 +170,8 @@
         <input type="file" id="files" name="files[]" />
         <output id="list"></output>
         <div>
-            Filters:
+            <input name="opradio" type="radio" value="filters" checked="checked">Filters<input name="opradio" type="radio" value="effects">Effects
+            <div id="div_filters">
             <table>
                 <tr>
                     <td><button id="gs_btn">Show Grayscale</button></td>
@@ -190,11 +206,13 @@
                     <td><input type="text" id="reduction_colors" value="4"></td>
                 </tr>
             </table>
-            Effects:
+            </div>
+            <div id="div_effects">
             <table>
                 <tr><td><button id="sepia_btn" class="effect_btn" value="sepia">Sepia</button></td></tr>
                 <tr><td><button id="autumn_btn" class="effect_btn" value="autumn">Autumn</button></td></tr>
             </table>
+            </div>
         </div>
         <p id='imageinfo'></p>
         <div>
