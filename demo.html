@@ -12,6 +12,7 @@
 
     <!-- Peihong's library -->
     <script type="text/javascript" src="algorithms.js"></script>
+    <script type="text/javascript" src="benchmark.js"></script>
     <script type="text/javascript" src="colorutils.js"></script>
     <script type="text/javascript" src="color.js"></script>
     <script type="text/javascript" src="image.js"></script>
@@ -91,7 +92,9 @@
                 var I = loader.result;
                 var m = $('#reduction_method').val();
                 var colors = parseFloat($('#reduction_colors').val());
-                I = filters.reduction(I, m, colors);
+                benchmark( function() {
+                    I = filters.reduction(I, m, colors);
+                });
                 I.render(canvas);
                 histtool.bindImage( I );
             });
@@ -103,7 +106,11 @@
                     size: parseFloat($('#filter_size').val()),
                     sigma: parseFloat($('#filter_sigma').val())
                 };
-                I = filters.spatialfilter(I, algorithms.createfilter(params));
+
+                benchmark(function() {
+                    I = filters.spatialfilter(I, algorithms.createfilter(params));
+                });
+
                 I.render(canvas);
                 histtool.bindImage( I );
             });

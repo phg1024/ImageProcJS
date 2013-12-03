@@ -260,6 +260,8 @@ var filters = {
         }
     },
     spatialfilter : function( src, f ) {
+
+        console.log( 'applying spatial filter ...' ) ;
         // source image size
         var w = src.w, h = src.h;
         // filter size
@@ -271,7 +273,8 @@ var filters = {
         // inverse of the scaling factor( sum of weights )
         var invfactor = 1.0 / f.factor;
 
-        return src.map(function(c0, x, y, w, h) {
+        /*
+        var filterfunc = function(c0, x, y, w, h) {
             var r = 0, g = 0, b = 0;
             for(var i=-hf, fi= 0, fidx = 0;i<=hf;i++, fi++) {
                 var py = clamp(i+y, 0, h-1);
@@ -290,6 +293,35 @@ var filters = {
 
             var c = new Color(r, g, b, c0.a);
             return c.round().clamp();
-        });
+        };
+
+        return src.map(filterfunc);
+        */
+
+        var dst = new RGBAImage(w, h);
+        var srcdata = src.data;
+        var round = Math.round;
+        for(var y = 0,idx=0;y<h;++y) {
+            for(var x=0;x<w;++x,idx+=4) {
+                var r = 0, g = 0, b = 0;
+                for(var i=-hf, fi= 0, fidx = 0;i<=hf;++i, ++fi) {
+                    var py = clamp(i+y, 0, h-1);
+                    for(var j=-wf, fj=0;j<=wf;++j, ++fj, ++fidx) {
+                        var px = clamp(j+x, 0, w-1);
+                        var pidx = (py * w + px) * 4;
+                        var wij = weights[fidx];
+                        r += srcdata[pidx] * wij;
+                        g += srcdata[++pidx] * wij;
+                        b += srcdata[++pidx] * wij;
+                    }
+                }
+                r = round(clamp(r * invfactor + bias, 0, 255));
+                g = round(clamp(g * invfactor + bias, 0, 255));
+                b = round(clamp(b * invfactor + bias, 0, 255));
+
+                dst.setPixel(x, y, new Color(r, g, b, srcdata[idx+3]));
+            }
+        }
+        return dst;
     }
 };

@@ -63,7 +63,6 @@ RGBAImage.prototype.apply = function( f ) {
 // utility function
 // per-pixel operation
 RGBAImage.prototype.map = function( f ) {
-    var startT = new Date();
     var w = this.w, h = this.h;
     var dst = new RGBAImage(w, h);
     var data = this.data;
@@ -78,8 +77,6 @@ RGBAImage.prototype.map = function( f ) {
             x, y, w, h));
 		}
 	}
-    var endT = new Date();
-    console.log(endT - startT);
 	return dst;
 };
 

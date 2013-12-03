@@ -8,7 +8,7 @@ function gaussianfilter(size, sigma) {
 
     var cx = (size-1) * 0.5;
     var cy = (size-1) * 0.5;
-    var r2 = sigma * sigma;
+    var r2 = 2.0 * sigma * sigma;
 
     var wsum = 0;
 
