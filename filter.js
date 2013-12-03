@@ -260,13 +260,15 @@ var filters = {
         }
     },
     spatialfilter : function( src, f ) {
-        console.log(f.width);
+        // source image size
         var w = src.w, h = src.h;
+        // filter size
         var wf = Math.floor((f.width - 1) / 2);
         var hf = Math.floor((f.height - 1) / 2);
         // filter weights
         var weights = f.weights;
         var bias = f.bias;
+        // inverse of the scaling factor( sum of weights )
         var invfactor = 1.0 / f.factor;
 
         return src.map(function(c0, x, y, w, h) {
