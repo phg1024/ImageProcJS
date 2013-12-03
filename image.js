@@ -63,12 +63,23 @@ RGBAImage.prototype.apply = function( f ) {
 // utility function
 // per-pixel operation
 RGBAImage.prototype.map = function( f ) {
-    var dst = new RGBAImage(this.w, this.h);
-	for(var y=0;y<this.h;y++) {
-		for(var x=0;x<this.w;x++) {
-			dst.setPixel(x, y, f(this.getPixel(x, y), x, y, this.w, this.h));
+    var startT = new Date();
+    var w = this.w, h = this.h;
+    var dst = new RGBAImage(w, h);
+    var data = this.data;
+	for(var y = 0,idx= 0;y<this.h;++y) {
+		for(var x=0;x<this.w;++x,++idx) {
+            dst.setPixel(x, y, f(new Color(
+                data[idx],
+                data[++idx],
+                data[++idx],
+                data[++idx]
+            ),
+            x, y, w, h));
 		}
 	}
+    var endT = new Date();
+    console.log(endT - startT);
 	return dst;
 };
 
