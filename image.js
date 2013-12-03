@@ -66,7 +66,7 @@ RGBAImage.prototype.map = function( f ) {
     var dst = new RGBAImage(this.w, this.h);
 	for(var y=0;y<this.h;y++) {
 		for(var x=0;x<this.w;x++) {
-			dst.setPixel(x, y, f(this.getPixel(x, y)));
+			dst.setPixel(x, y, f(this.getPixel(x, y), x, y, this.w, this.h));
 		}
 	}
 	return dst;

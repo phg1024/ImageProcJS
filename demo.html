@@ -94,7 +94,19 @@
                 I = filters.reduction(I, m, colors);
                 I.render(canvas);
                 histtool.bindImage( I );
-            })
+            });
+
+            $('#filter_btn').click(function() {
+                var I = loader.result;
+                var params = {
+                    name: $('#filter_select').val(),
+                    size: parseFloat($('#filter_size').val()),
+                    sigma: parseFloat($('#filter_sigma').val())
+                };
+                I = filters.spatialfilter(I, algorithms.createfilter(params));
+                I.render(canvas);
+                histtool.bindImage( I );
+            });
 
             $('#brightnessbar').change( function() {
                 var beta = parseInt($('#brightnessbar').val());
@@ -143,6 +155,7 @@
                 histtool.bindImage( I );
             });
 
+            $('#div_effects').hide();
             $("input[name='opradio']").change(function(){
                 console.log($("input[name='opradio']:checked").val());
                 switch ( $("input[name='opradio']:checked").val() ) {
@@ -203,7 +216,20 @@
                         <option value="knn">kNN</option>
                         <option value="ann">ANN</option>
                     </select></td>
-                    <td><input type="text" id="reduction_colors" value="4"></td>
+                    <td>Colors&nbsp<input type="text" id="reduction_colors" value="4"></td>
+                </tr>
+                <tr>
+                    <td><button id="filter_btn">Spatial Filter</button></td>
+                    <td>
+                        <select id="filter_select">
+                            <option value="gaussian">Gaussian</option>
+                            <option value="sharpen">Sharpen</option>
+                        </select>
+                    </td>
+                    <td>
+                        Size&nbsp<input type="text" id="filter_size" value="3">
+                        Sigma&nbsp<input type="text" id="filter_sigma" value="1">
+                    </td>
                 </tr>
             </table>
             </div>

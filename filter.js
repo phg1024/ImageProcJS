@@ -258,5 +258,36 @@ var filters = {
                 });
             }
         }
+    },
+    spatialfilter : function( src, f ) {
+        console.log(f.width);
+        var w = src.w, h = src.h;
+        var wf = Math.floor((f.width - 1) / 2);
+        var hf = Math.floor((f.height - 1) / 2);
+        // filter weights
+        var weights = f.weights;
+        var bias = f.bias;
+        var invfactor = 1.0 / f.factor;
+
+        return src.map(function(c0, x, y, w, h) {
+            var r = 0, g = 0, b = 0;
+            for(var i=-hf, fi= 0, fidx = 0;i<=hf;i++, fi++) {
+                var py = clamp(i+y, 0, h-1);
+                for(var j=-wf, fj=0;j<=wf;j++, fj++, fidx++) {
+                    var px = clamp(j+x, 0, w-1);
+                    var wij = weights[fidx];
+                    var cij = src.getPixel(px, py);
+                    r += cij.r * wij;
+                    g += cij.g * wij;
+                    b += cij.b * wij;
+                }
+            }
+            r = r * invfactor + bias;
+            g = g * invfactor + bias;
+            b = b * invfactor + bias;
+
+            var c = new Color(r, g, b, c0.a);
+            return c.round().clamp();
+        });
     }
 };
