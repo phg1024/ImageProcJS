@@ -1,13 +1,6 @@
 function Color(r, g, b, a)
 {
-    if( arguments.length !== 4 )
-    {
-        this.r = this.g = this.b = this.a = 0;
-    }
-    else
-    {
-        this.r = r; this.g = g; this.b = b; this.a = a;
-    }
+    this.r = r; this.g = g; this.b = b; this.a = a;
 }
 
 Color.RED = new Color(255, 0, 0, 255);

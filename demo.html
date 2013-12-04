@@ -62,7 +62,9 @@
 
             $('#gs_btn').click( function() {
                 var I = loader.result;
-                I = filters.grayscale(I);
+                benchmark(function(){
+                    I = filters.grayscale(I);
+                });
                 I.render(canvas);
                 histtool.bindImage( I );
             });
@@ -76,7 +78,9 @@
 
             $('#hist_btn').click(function() {
                 var I = loader.result;
-                I = filters.histogram(I);
+                benchmark(function() {
+                    I = filters.histogram(I);
+                });
                 I.render(canvas);
                 histtool.bindImage( I );
             });

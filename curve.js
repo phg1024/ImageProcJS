@@ -70,7 +70,7 @@ function CatmullRomCurve( pts ) {
                     }
                 }
 
-                y = clamp(y, 0, 255);
+                y = clamp(Math.round(y), 0, 255);
                 return y;
             }
         }

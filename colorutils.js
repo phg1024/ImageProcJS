@@ -106,9 +106,9 @@ function colorHistogram(img, x1, y1, x2, y2, num_bins) {
             hist[c][i] = 0;
     }
 
-    for(var y=y1;y<y2;y++)
+    for(var y=y1;y<y2;++y)
     {
-        for(var x=x1;x<x2;x++)
+        for(var x=x1;x<x2;++x)
         {
             var c = img.getPixel(x, y);
             var rval = Math.floor((c.r / 255.0) * (num_bins-1));
@@ -132,12 +132,12 @@ function histogram(img, x1, y1, x2, y2, num_bins)
     var h = img.h;
     var w = img.w;
     var hist = [];
-    for(var i=0;i<num_bins;i++)
+    for(var i=0;i<num_bins;++i)
         hist[i] = 0;
 
-    for(var y=y1;y<y2;y++)
+    for(var y=y1;y<y2;++y)
     {
-        for(var x=x1;x<x2;x++)
+        for(var x=x1;x<x2;++x)
         {
             var idx = (y * w + x) * 4;
             var val = Math.floor((img.data[idx] / 255.0) * (num_bins-1));
@@ -156,7 +156,7 @@ function buildcdf( hist, num_bins )
 
     var cumuhist = [];
     cumuhist[0] = hist[0];
-    for(var i=1;i<num_bins;i++)
+    for(var i=1;i<num_bins;++i)
         cumuhist[i] = cumuhist[i-1] + hist[i];
 
     return cumuhist;
@@ -169,7 +169,7 @@ function normalizecdf( cdf, scale, num_bins ) {
 
     var total = cdf[num_bins-1];
     var ncdf = new Array(num_bins);
-    for(var i=0;i<num_bins;i++)
+    for(var i=0;i<num_bins;++i)
         ncdf[i] = cdf[i] / total * scale;
 
     return ncdf;
@@ -203,7 +203,7 @@ function findClosest(val, list) {
 function findClosestColor(c, colormap) {
     var minIdx = 0;
     var minDist = c.distance(colormap[0]);
-    for(var i=1;i<colormap.length;i++) {
+    for(var i=1;i<colormap.length;++i) {
         var ci = colormap[i];
         var dist = c.distance( ci );
 

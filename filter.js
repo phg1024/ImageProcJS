@@ -1,35 +1,34 @@
 var filters = {
     grayscale : function( src ) {
-        return src.map(function( c ) {
-            var lev = Math.round((c.r * 299 + c.g * 587 + c.b * 114) / 1000);
-            c.r = c.g = c.b = lev;
-            return c;
-        });
+        return src.map(
+            function(r, g, b, a) {
+                var lev  = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+                return new Color(lev, lev, lev, a);
+            }
+        );
     },
     invert : function( src ) {
-        return src.map(function( c ) {
-            return new Color(255- c.r, 255- c.g, 255- c.b, c.a);
+        return src.map(function( r, g, b, a ) {
+            return new Color(255- r, 255- g, 255- b, a);
         });
     },
     brightness : function( src, val ) {
-        var dc = new Color(val, val, val, 0);
-        return src.map(function( c ) {
-            var nc = c.add(dc);
+        return src.map(function( r, g, b, a ) {
+            var nc = new Color(r + val, g + val, b + val, a);
             return nc.clamp();
         });
     },
     contrast : function( src, val ) {
         var factor = Math.max((128 + val) / 128, 0);
-        return src.map(function( c0 ) {
-            var c = c0.mulc(factor);
+        return src.map(function( r, g, b, a ) {
+            var c = new Color(r * factor, g * factor, b * factor, a);
             return c.clamp();
         });
     },
     brightnesscontrast : function( src, alpha, beta ) {
         var factor = Math.max((128 + alpha) / 128, 0);
-        var dc = new Color(beta, beta, beta, 0);
-        return src.map(function( c0 ) {
-            var c = c0.mulc(factor).add(dc);
+        return src.map(function( r, g, b, a ) {
+            var c = new Color(r * factor + beta, g * factor + beta, b * factor + beta, a);
             return c.clamp();
         });
     },
@@ -49,11 +48,12 @@ var filters = {
         var cumuhist = normalizecdf(cdf, 255);
 
         // equalize
-        return src.map(function(c0){
-            var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
+        return src.map(function(r, g, b, a, x, y){
+            var lev = gimg.getPixel(x, y).r;
             var cI = cumuhist[lev];
             var ratio = cI / lev;
-            return c0.mulc(ratio).clamp().round();
+            var c = new Color(r * ratio, g * ratio, b * ratio, a);
+            return c.clamp().round();
         });
     },
     ahe : function( src ) {
@@ -99,10 +99,11 @@ var filters = {
         }
 
         var dst = new RGBAImage(w, h);
+        var srcdata = src.data;
 
-        for(var y=0;y<h;y++)
+        for(var y=0, idx=0;y<h;++y)
         {
-            for(var x=0;x<w;x++)
+            for(var x=0;x<w;++x, idx+=4)
             {
                 // intensity of current pixel
                 var I = gimg.getPixel(x, y).r;
@@ -135,8 +136,8 @@ var filters = {
                     +      fx  *      fy  * cdf22;
 
                 var ratio = Iout / I;
-                var c = src.getPixel(x, y).mulc(ratio).clamp();
-                dst.setPixel(x, y, c);
+                var c = new Color(srcdata[idx] * ratio, srcdata[idx+1] * ratio, srcdata[idx+2] * ratio, srcdata[idx+3]);
+                dst.setPixel(x, y, c.clamp());
             }
         }
 
@@ -148,34 +149,31 @@ var filters = {
         {
             case 'red':
             {
-                return src.map(function(c0) {
-                    var c = new Color(lut[c0.r], c0.g, c0.b, c0.a);
-                    return c.round().clamp();
+                return src.map(function(r, g, b, a) {
+                    return new Color(lut[r], g, b, a);
                 });
             }
             case 'green':
             {
-                return src.map(function(c0) {
-                    var c = new Color(c0.r, lut[c0.g], c0.b, c0.a);
-                    return c.round().clamp();
+                return src.map(function(r, g, b, a) {
+                    return new Color(r, lut[g], b, a);
                 });
             }
             case 'blue':
             {
-                return src.map(function(c0) {
-                    var c = new Color(c0.r, c0.g, lut[c0.b], c0.a);
-                    return c.round().clamp();
+                return src.map(function(r, g, b, a) {
+                    return new Color(r, g, lut[b], a);
                 });
             }
             case 'brightness':
             default:
             {
-                return src.map(function(c0) {
-                    var lev = Math.round((c0.r * 299 + c0.g * 587 + c0.b * 114) / 1000);
+                return src.map(function(r, g, b, a) {
+                    var lev = Math.round((r * 299 + g * 587 + b * 114) / 1000);
                     var bias = 1e-6;			// prevent divide by zero
                     var ratio = lut[lev]/(lev + bias);
-                    var c = c0.mulc(ratio);
-                    return c.round().clamp();
+                    var c = new Color(Math.round(r * ratio), Math.round(g * ratio), Math.round(b * ratio), a);
+                    return c.clamp();
                 });
             }
         }
@@ -185,11 +183,11 @@ var filters = {
             case 'uniform': {
                 var levs = Math.ceil(Math.pow(colors, 1.0/3.0));
                 var round = Math.round;
-                return src.map(function(c) {
-                    var r = round(round((c.r / 255.0) * levs) / levs * 255.0);
-                    var g = round(round((c.g / 255.0) * levs) / levs * 255.0);
-                    var b = round(round((c.b / 255.0) * levs) / levs * 255.0);
-                    return new Color(r, g, b, c.a);
+                return src.map(function(r, g, b, a) {
+                    r = round(round((r / 255.0) * levs) / levs * 255.0);
+                    g = round(round((g / 255.0) * levs) / levs * 255.0);
+                    b = round(round((b / 255.0) * levs) / levs * 255.0);
+                    return new Color(r, g, b, a);
                 });
             }
             case 'population': {
@@ -223,38 +221,38 @@ var filters = {
                     bPoints = genSamples(bcdf);
 
                 // assemble the samples to a color table
-                return src.map(function(c) {
+                return src.map(function(r, g, b, a) {
                     // find closet r sample point
-                    var r = findClosest(c.r, rPoints);
+                    r = findClosest(r, rPoints);
 
                     // find closet g sample point
-                    var g = findClosest(c.g, gPoints);
+                    g = findClosest(g, gPoints);
 
                     // find closet b sample point
-                    var b = findClosest(c.b, bPoints);
+                    b = findClosest(b, bPoints);
 
-                    return new Color(r, g, b, c.a);
+                    return new Color(r, g, b, a);
                 });
             }
             case 'mediancut': {
                 var colormap = algorithms.mediancut(src, colors);
-                return src.map(function(c) {
-                    var nc = findClosestColor(c, colormap);
-                    return new Color(nc.r, nc.g, nc.b, c.a);
+                return src.map(function(r, g, b, a) {
+                    var nc = findClosestColor(new Color(r, g, b, a), colormap);
+                    return new Color(nc.r, nc.g, nc.b, a);
                 });
             }
             case 'knn': {
                 var colormap = algorithms.kmeans(src, colors);
-                return src.map(function(c) {
-                    var nc = findClosestColor(c, colormap);
-                    return new Color(nc.r, nc.g, nc.b, c.a);
+                return src.map(function(r, g, b, a) {
+                    var nc = findClosestColor(new Color(r, g, b, a), colormap);
+                    return new Color(nc.r, nc.g, nc.b, a);
                 });
             }
             case 'ann': {
                 var colormap = algorithms.neuralnetwork(src, colors);
-                return src.map(function(c) {
-                    var nc = findClosestColor(c, colormap);
-                    return new Color(nc.r, nc.g, nc.b, c.a);
+                return src.map(function(r, g, b, a) {
+                    var nc = findClosestColor(new Color(r, g, b, a), colormap);
+                    return new Color(nc.r, nc.g, nc.b, a);
                 });
             }
         }
@@ -273,9 +271,12 @@ var filters = {
         // inverse of the scaling factor( sum of weights )
         var invfactor = 1.0 / f.factor;
 
+
+        // slow implementation
         /*
-        var filterfunc = function(c0, x, y, w, h) {
-            var r = 0, g = 0, b = 0;
+         var round = Math.round;
+         return src.map( function(r, g, b, a, x, y, w, h) {
+            r = 0, g = 0, b = 0;
             for(var i=-hf, fi= 0, fidx = 0;i<=hf;i++, fi++) {
                 var py = clamp(i+y, 0, h-1);
                 for(var j=-wf, fj=0;j<=wf;j++, fj++, fidx++) {
@@ -287,21 +288,19 @@ var filters = {
                     b += cij.b * wij;
                 }
             }
-            r = r * invfactor + bias;
-            g = g * invfactor + bias;
-            b = b * invfactor + bias;
+            r = round(clamp(r * invfactor + bias, 0, 255));
+            g = round(clamp(g * invfactor + bias, 0, 255));
+            b = round(clamp(b * invfactor + bias, 0, 255));
 
-            var c = new Color(r, g, b, c0.a);
-            return c.round().clamp();
-        };
-
-        return src.map(filterfunc);
+            return new Color(r, g, b, a);
+        } );
         */
 
+        // fast implementation
         var dst = new RGBAImage(w, h);
         var srcdata = src.data;
         var round = Math.round;
-        for(var y = 0,idx=0;y<h;++y) {
+        for(var y = 0,idx=3;y<h;++y) {
             for(var x=0;x<w;++x,idx+=4) {
                 var r = 0, g = 0, b = 0;
                 for(var i=-hf, fi= 0, fidx = 0;i<=hf;++i, ++fi) {
@@ -319,7 +318,7 @@ var filters = {
                 g = round(clamp(g * invfactor + bias, 0, 255));
                 b = round(clamp(b * invfactor + bias, 0, 255));
 
-                dst.setPixel(x, y, new Color(r, g, b, srcdata[idx+3]));
+                dst.setPixel(x, y, new Color(r, g, b, srcdata[idx]));
             }
         }
         return dst;
