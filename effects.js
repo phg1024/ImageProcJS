@@ -6,17 +6,20 @@
 var effects = {
     sepia : function(src) {
         var round = Math.round;
-        return src.map(function(c) {
-            var r = round(c.r * .393 + c.g * .769 + c.b * .189);
-            var g = round(c.r * .349 + c.g * .686 + c.b * .168);
-            var b = round(c.r * .272 + c.g * .534 + c.b * .131);
-            var cc = new Color(r, g, b, c.a);
+        return src.map(function(r, g, b, a) {
+            var nr = round(r * .393 + g * .769 + b * .189);
+            var ng = round(r * .349 + g * .686 + b * .168);
+            var nb = round(r * .272 + g * .534 + b * .131);
+            var cc = new Color(nr, ng, nb, a);
             return cc.clamp();
         });
     },
     autumn : function(src) {
-        return src.map(function(c) {
-            var cc = new Color(c.r + c.g * 1.25 - c.b * 1.25, c.g, c.b, c.a);
+        return src.map(function(r, g, b, a) {
+            var nr = r + g * 1.25 - b * 1.25;
+            var ng = g;
+            var nb = b;
+            var cc = new Color(nr, ng, nb, a);
             return cc.clamp();
         });
     }

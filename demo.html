@@ -36,24 +36,25 @@
             histtool.init('#div_curvetool', 'rgb');
             curvetool.init('#div_curvetool');
 
-            $(document).on("curvechanged", function(evt) {
-                console.log('curve changed.');
+            var transformImage = function( func ) {
                 var I = loader.result;
-                I = filters.curve(I, curvetool.getLUT(), $('#channelselect').val());
+                benchmark(function(){I = func( I );});
                 I.render(canvas);
                 histtool.bindImage( I );
+            }
+
+            $(document).on("curvechanged", function(evt) {
+                console.log('curve changed.');
+                transformImage(function(I) { return filters.curve(I, curvetool.getLUT(), $('#channelselect').val()); });
             });
 
             $(document).on('imageloaded', function() {
-                var I = loader.result;
-                histtool.bindImage( I );
+                transformImage(function(I) { return I; });
             });
 
             $('#resetcurve_btn').click(function() {
                 curvetool.resetCurveTool();
-                var I = loader.result;
-                I.render(canvas);
-                histtool.bindImage( I );
+                transformImage(function(I) { return I; });
             });
 
             $('#show_btn').click( function() {
@@ -61,62 +62,45 @@
             });
 
             $('#gs_btn').click( function() {
-                var I = loader.result;
-                benchmark(function(){
-                    I = filters.grayscale(I);
+                transformImage(function(I) {
+                    return filters.grayscale(I);
                 });
-                I.render(canvas);
-                histtool.bindImage( I );
             });
 
             $('#invert_btn').click( function() {
-                var I = loader.result;
-                I = filters.invert(I);
-                I.render(canvas);
-                histtool.bindImage( I );
+                transformImage(function(I) {
+                    return filters.invert(I);
+                });
             });
 
             $('#hist_btn').click(function() {
-                var I = loader.result;
-                benchmark(function() {
-                    I = filters.histogram(I);
+                transformImage(function(I) {
+                    return filters.histogram(I);
                 });
-                I.render(canvas);
-                histtool.bindImage( I );
             });
 
             $('#ahe_btn').click(function() {
-                var I = loader.result;
-                I = filters.ahe(I);
-                I.render(canvas);
-                histtool.bindImage( I );
+                transformImage(function(I) {
+                    return filters.ahe(I);
+                });
             });
 
             $('#reduction_btn').click(function() {
-                var I = loader.result;
-                var m = $('#reduction_method').val();
-                var colors = parseFloat($('#reduction_colors').val());
-                benchmark( function() {
-                    I = filters.reduction(I, m, colors);
+                transformImage(function(I) {
+                    return filters.reduction(I, $('#reduction_method').val(), parseFloat($('#reduction_colors').val()));
                 });
-                I.render(canvas);
-                histtool.bindImage( I );
             });
 
             $('#filter_btn').click(function() {
-                var I = loader.result;
-                var params = {
-                    name: $('#filter_select').val(),
-                    size: parseFloat($('#filter_size').val()),
-                    sigma: parseFloat($('#filter_sigma').val())
-                };
-
-                benchmark(function() {
-                    I = filters.spatialfilter(I, algorithms.createfilter(params));
+                transformImage(function(I) {
+                    return filters.spatialfilter(I, algorithms.createfilter(
+                            {
+                                name: $('#filter_select').val(),
+                                size: parseFloat($('#filter_size').val()),
+                                sigma: parseFloat($('#filter_sigma').val())
+                            }
+                    ));
                 });
-
-                I.render(canvas);
-                histtool.bindImage( I );
             });
 
             $('#brightnessbar').change( function() {
@@ -153,17 +137,15 @@
             });
 
             $('#sepia_btn').click(function(e) {
-                var I = loader.result;
-                I = effects.sepia(I);
-                I.render(canvas);
-                histtool.bindImage( I );
+                transformImage(function(I){
+                    return effects.sepia(I);
+                });
             });
 
             $('#autumn_btn').click(function(e) {
-                var I = loader.result;
-                I = effects.autumn(I);
-                I.render(canvas);
-                histtool.bindImage( I );
+                transformImage(function(I){
+                    return effects.autumn(I);
+                });
             });
 
             $('#div_effects').hide();

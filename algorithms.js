@@ -5,9 +5,12 @@ var algorithms = {};
 require(["algorithms/mediancut",
     "algorithms/kmeans",
     "algorithms/neuralnetwork",
-    "algorithms/filterfactory"], function() {
-    algorithms.mediancut = mediancut;
-    algorithms.kmeans = kmeans;
-    algorithms.neuralnetwork = neuralnetwork;
-    algorithms.createfilter = FilterFactory.createfilter;
-});
+    "algorithms/filterfactory"],
+
+    function() {
+        algorithms.mediancut = mediancut;
+        algorithms.kmeans = kmeans;
+        algorithms.neuralnetwork = neuralnetwork;
+        algorithms.createfilter = FilterFactory.createfilter;
+    }
+);
