@@ -30,6 +30,47 @@ function gaussianfilter(size, sigma) {
     };
 }
 
+function hsobel() {
+    return {
+        width : 3,
+        height : 3,
+        factor : 1.0,
+        bias : 0.0,
+        weights : [
+            -1, 0, 1,
+            -2, 0, 2,
+            -1, 0, 1
+        ]
+    };
+}
+
+function vsobel() {
+    return {
+        width : 3,
+        height : 3,
+        factor : 1.0,
+        bias : 0.0,
+        weights : [
+            -1, -2, -1,
+            0,  0,  0,
+            1,  2,  1
+        ]
+    };
+}
+
+function laplacian() {
+    return {
+        width : 3,
+        height : 3,
+        factor : 1.0,
+        bias : 0.0,
+        weights : [
+            -1, -1, -1,
+            -1, 8, -1,
+            -1, -1, -1
+        ]
+    };
+}
 
 function sharpenfilter(size, sigma, amount) {
     var f = gaussianfilter(size, sigma);
@@ -58,6 +99,15 @@ var FilterFactory = {
                 var sigma = params.sigma || 1.0;
                 var amount = params.amount || 4.0;
                 return sharpenfilter(size, sigma, amount);
+            }
+            case 'hsobel': {
+                return hsobel();
+            }
+            case 'vsobel': {
+                return vsobel();
+            }
+            case 'laplacian': {
+                return laplacian();
             }
         }
     }
