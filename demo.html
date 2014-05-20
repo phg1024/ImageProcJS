@@ -41,7 +41,7 @@
                 benchmark(function(){I = func( I );});
                 I.render(canvas);
                 histtool.bindImage( I );
-            }
+            };
 
             $(document).on("curvechanged", function(evt) {
                 console.log('curve changed.');
@@ -103,11 +103,10 @@
                 });
             });
 
-            $('#brightnessbar').change( function() {
+            $('#brightnessbar').bind('input', function(e) {
                 var beta = parseInt($('#brightnessbar').val());
                 $('#brightnessval').html(beta);
                 var I = loader.result;
-
                 if( $('#brightnesscontrast').is(':checked') ){
                     var alpha = parseInt($('#contrastbar').val());
                     I = filters.brightnesscontrast(I, alpha, beta);
@@ -118,7 +117,7 @@
                 histtool.bindImage( I );
             });
 
-            $('#contrastbar').change( function() {
+            $('#contrastbar').bind('input', function(e) {
                 var alpha = parseInt($('#contrastbar').val());
                 $('#contrastval').html(alpha);
                 var I = loader.result;

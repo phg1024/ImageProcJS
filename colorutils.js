@@ -135,12 +135,14 @@ function histogram(img, x1, y1, x2, y2, num_bins)
     for(var i=0;i<num_bins;++i)
         hist[i] = 0;
 
+    var invf = 1.0 / 255.0;
+    var nbins = num_bins - 1;
     for(var y=y1;y<y2;++y)
     {
         for(var x=x1;x<x2;++x)
         {
             var idx = (y * w + x) * 4;
-            var val = Math.floor((img.data[idx] / 255.0) * (num_bins-1));
+            var val = Math.floor((img.data[idx] * invf) * nbins);
             hist[val]++;
         }
     }
